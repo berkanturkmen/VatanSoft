@@ -78,7 +78,7 @@ type Session struct {
 type Polyclinic struct {
 	gorm.Model
 	Name string `gorm:"type:varchar(255)"`
-	HospitalPolyclinics []HospitalPolyclinic `gorm:"foreignKey:PolyclinicID"`
+	HospitalPolyclinics[] HospitalPolyclinic `gorm:"foreignKey:PolyclinicID"`
 }
 
 type HospitalPolyclinic struct {
@@ -101,6 +101,7 @@ type Job struct {
 type Title struct {
 	gorm.Model
 	Name string `gorm:"type:varchar(255)"`
+	IsUnique bool `gorm:"default:false;not null"`
 
 	Job Job `gorm:"foreignKey:JobID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
 	JobID uint `gorm:"index"`;

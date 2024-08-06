@@ -160,4 +160,16 @@ func SeedDB() {
 			log.Fatalf("Error: %v", result.Error)
 		}
 	}
+
+		var basehekimTitle models.Title
+	updateResult := DB.Where( & models.Title {
+		Name: "Başhekim",
+	}).First( & basehekimTitle)
+	if updateResult.Error == nil {
+		basehekimTitle.IsUnique = true
+
+		DB.Save( & basehekimTitle)
+	} else {
+		log.Fatalf("Error: %v", updateResult.Error)
+	}
 }

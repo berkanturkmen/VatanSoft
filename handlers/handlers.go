@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"github.com/berkanturkmen/VatanSoft/cache"
 	"encoding/json"
+	"errors"
 )
 
 func GetCities(c * fiber.Ctx) error {
@@ -925,6 +926,27 @@ type PersonnelDTO struct {
 	TitleName string `json:"TitleName"`
 }
 
+func ensureUniqueTitle(titleID uint) error {
+	var title models.Title
+
+	if err := database.DB.First( & title, titleID).Error;
+	err != nil {
+		return err
+	}
+
+	if title.IsUnique {
+		var existingCount int64
+
+		database.DB.Model( & models.Personnel {}).Where("title_id = ?", titleID).Count( & existingCount)
+
+		if existingCount > 0 {
+			return errors.New("Error!")
+		}
+	}
+
+	return nil
+}
+
 func ListPersonnels(c * fiber.Ctx) error {
 	var personnels[] models.Personnel
 
@@ -1071,6 +1093,13 @@ func CreatePersonnel(c * fiber.Ctx) error {
 		}
 	}
 
+	if err := ensureUniqueTitle(personnel.TitleID);err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map {
+			"Message": "",
+			"Success": false,
+		})
+	}
+
 	if result := database.DB.Create(personnel);result.Error != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map {
 			"Message": "",
@@ -1190,6 +1219,14 @@ func UpdatePersonnel(c * fiber.Ctx) error {
 				"Success": false,
 			})
 		}
+	}
+
+	if err := ensureUniqueTitle(personnel.TitleID);
+	err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map {
+			"Message": "",
+			"Success": false,
+		})
 	}
 
 	personnel.IdentityNumber = input.IdentityNumber
